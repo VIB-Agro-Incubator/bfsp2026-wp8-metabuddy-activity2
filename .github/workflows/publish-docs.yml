@@ -1,0 +1,22 @@
+name: Publish API Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'openapi/metabuddy-api-v0.2.1-minimal.yaml'
+      - 'openapi/metabuddy-api-v0.4.0-conversational.yaml'
+      - '.github/workflows/publish-docs.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Redoc HTML
+        run: npx @redocly/cli build-docs openapi.yaml -o index.html
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
