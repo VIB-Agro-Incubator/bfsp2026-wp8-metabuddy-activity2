@@ -17,9 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build Redoc HTML (v0.2.1 minimal)
-        run: npx @redocly/cli build-docs openapi/metabuddy-api-v0.2.1-minimal.yaml -o minimal/index.html
+        run: npx @redocly/cli build-docs openapi/metabuddy-api-v0.2.1-minimal.yaml --config redocly.yaml -o minimal/index.html
       - name: Build Redoc HTML (v0.4.0 conversational)
-        run: npx @redocly/cli build-docs openapi/metabuddy-api-v0.4.0-conversational.yaml -o conversational/index.html
+        run: npx @redocly/cli build-docs openapi/metabuddy-api-v0.4.0-conversational.yaml --config redocly.yaml -o conversational/index.html
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
