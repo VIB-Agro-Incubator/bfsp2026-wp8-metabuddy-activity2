@@ -6,7 +6,8 @@ on:
     paths:
       - 'openapi/metabuddy-api-v0.2.1-minimal.yaml'
       - 'openapi/metabuddy-api-v0.4.0-conversational.yaml'
-      - '.github/workflows/publish-docs.yml'
+      - '.github/workflows/main.yml'
+      - 'README.md'
 
 jobs:
   build:
