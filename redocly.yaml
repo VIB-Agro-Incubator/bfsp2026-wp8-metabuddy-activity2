@@ -1,0 +1,15 @@
+theme:
+  typography:
+    fontSize: '14px'
+    lineHeight: '1.4em'
+  spacing:
+    unit: 4
+    sectionHorizontal: 20
+    sectionVertical: 20
+  rightPanel:
+    width: '35%'
+  expandResponses: "200"
+  jsonSampleExpandLevel: 2
+  hideSchemaTitles: true
+  requiredPropsFirst: true
+  menuToggle: true
