@@ -7,15 +7,17 @@ on:
       - 'openapi/metabuddy-api-v0.2.1-minimal.yaml'
       - 'openapi/metabuddy-api-v0.4.0-conversational.yaml'
       - '.github/workflows/main.yml'
-      - 'README.md'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build Redoc HTML
-        run: npx @redocly/cli build-docs openapi.yaml -o index.html
+      - name: Build Redoc HTML (v0.2.1 minimal)
+        run: npx @redocly/cli build-docs openapi/metabuddy-api-v0.2.1-minimal.yaml -o minimal/index.html
+      - name: Build Redoc HTML (v0.4.0 conversational)
+        run: npx @redocly/cli build-docs openapi/metabuddy-api-v0.4.0-conversational.yaml -o conversational/index.html
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
