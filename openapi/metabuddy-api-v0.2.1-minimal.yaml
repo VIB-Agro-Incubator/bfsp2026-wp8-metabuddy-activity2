@@ -4,34 +4,28 @@ info:
   description: >
     LLM-powered ISA metadata assistance API, consumed by ISA Wizard.
 
-    This is the minimal specification. All calls are
-    synchronous and stateless — ISA Wizard owns all state and passes
-    the relevant ISA-JSON context on every request. No session management
-    is required.
+    This is the minimal specification. All calls are synchronous and stateless — ISA Wizard owns all state and passes the relevant ISA-JSON context on every request. No session management is required.
 
     ## Authentication
 
-    ISA Wizard authenticates as a service client using a pre-shared API key
-    (`X-API-Key` header) issued by MetaBuddy. This is a backend-to-backend
-    credential managed via a Keycloak service account on the MetaBuddy side.
-    Individual end-user identity does not cross the boundary. ISA Wizard
-    end-users may be anonymous.
+    ISA Wizard authenticates as a service client using a pre-shared API key (`X-API-Key` header) issued by MetaBuddy. This is a backend-to-backend credential managed via a Keycloak service account on the MetaBuddy side. Individual end-user identity does not cross the boundary. ISA Wizard end-users may be anonymous.
 
     ## Scoping
 
-    Every endpoint accepts a `scope` parameter that indicates which ISA
-    hierarchy level the user is currently at in the wizard.
+    Every endpoint accepts a `scope` parameter that indicates which ISA hierarchy level the user is currently at in the wizard.
 
   version: 0.2.1
   contact:
     name: TBD
 
 servers:
-  - url: https://metabuddy.dci.thehyve.nl/api/v1
-    description: Development / staging
+- url: https://metabuddy.dci.thehyve.nl/api/v1
+  description: MetaBuddy server
+- url: https://bfsp2026-wp8-metabuddy-activity2.onrender.com/
+  description: Mockup server
 
 security:
-  - ApiKeyAuth: []
+- ApiKeyAuth: []
 
 # ---------------------------------------------------------------------------
 # Components
@@ -44,38 +38,31 @@ components:
       in: header
       name: X-API-Key
       description: >
-        Service-level API key issued by MetaBuddy to the ISA Wizard application.
-        Not tied to individual end-users. Managed via Keycloak service account
-        on the MetaBuddy side.
+        Service-level API key issued by MetaBuddy to the ISA Wizard application. Not tied to individual end-users. Managed via Keycloak service account on the MetaBuddy side.
 
   schemas:
 
     IsaScope:
       type: string
       enum:
-        - investigation
-        - study
-        - assay
+      - investigation
+      - study
+      - assay
       description: >
-        ISA hierarchy level the user is currently at in the wizard. Must be
-        one of: `investigation`, `study`, or `assay` (all lowercase). Maps
-        directly to the three levels of the ISA standard. MetaBuddy uses this
-        to limit its response to what is relevant at that level.
+        ISA hierarchy level the user is currently at in the wizard. Must be one of: `investigation`, `study`, or `assay` (all lowercase). Maps directly to the three levels of the ISA standard. MetaBuddy uses this to limit its response to what is relevant at that level.
 
     IsaJson:
       type: object
       description: >
-        Partial or complete ISA-JSON object representing the user's current
-        metadata state. Follows the ISA-JSON specification:
-        https://isa-specs.readthedocs.io/en/latest/isajson.html
+        Partial or complete ISA-JSON object representing the user's current metadata state. Follows the ISA-JSON specification: https://isa-specs.readthedocs.io/en/latest/isajson.html
       additionalProperties: true
       example:
         identifier: "STUDY-001"
         title: "Drought stress in Arabidopsis thaliana"
         studyDesignDescriptors:
-          - annotationValue: "drought stress design"
-            termSource: "EFO"
-            termAccession: "http://www.ebi.ac.uk/efo/EFO_0001272"
+        - annotationValue: "drought stress design"
+          termSource: "EFO"
+          termAccession: "http://www.ebi.ac.uk/efo/EFO_0001272"
 
     OntologyTerm:
       type: object
@@ -103,9 +90,9 @@ components:
         severity:
           type: string
           enum:
-            - error       # Missing required field or invalid value
-            - warning     # Present but potentially incorrect or incomplete
-            - suggestion  # Optional improvement
+          - error # Missing required field or invalid value
+          - warning # Present but potentially incorrect or incomplete
+          - suggestion # Optional improvement
         message:
           type: string
           example: "studyDesignDescriptors is required for MIAPPE compliance."
@@ -113,8 +100,7 @@ components:
           type: string
           description: Optional LLM-generated corrective suggestion.
           example: >
-            Consider adding a descriptor such as 'drought stress design'
-            (EFO:0001272).
+            Consider adding a descriptor such as 'drought stress design' (EFO:0001272).
 
     ConvertResponse:
       type: object
@@ -124,9 +110,7 @@ components:
         confidence:
           type: object
           description: >
-            Map of ISA-JSON field paths to confidence scores (0.0–1.0).
-            ISA Wizard can use these to visually flag fields that need
-            human review (e.g. highlight fields below 0.7).
+            Map of ISA-JSON field paths to confidence scores (0.0–1.0). ISA Wizard can use these to visually flag fields that need human review (e.g. highlight fields below 0.7).
           additionalProperties:
             type: number
             minimum: 0.0
@@ -138,19 +122,18 @@ components:
         warnings:
           type: array
           description: >
-            ISA-JSON field paths that could not be inferred from the uploaded
-            files and still require manual input.
+            ISA-JSON field paths that could not be inferred from the uploaded files and still require manual input.
           items:
             type: string
           example:
-            - "studies[0].studyPublications"
-            - "studies[0].studyContacts"
+          - "studies[0].studyPublications"
+          - "studies[0].studyContacts"
 
     ValidateRequest:
       type: object
       required:
-        - isaJson
-        - scope
+      - isaJson
+      - scope
       properties:
         isaJson:
           $ref: '#/components/schemas/IsaJson'
@@ -163,8 +146,7 @@ components:
         valid:
           type: boolean
           description: >
-            True only if no issues of severity 'error' were found
-            within the given scope.
+            True only if no issues of severity 'error' were found within the given scope.
         issues:
           type: array
           items:
@@ -173,29 +155,26 @@ components:
     ExplainRequest:
       type: object
       required:
-        - field
-        - scope
+      - field
+      - scope
       properties:
         field:
           type: string
           description: >
-            ISA-JSON path of the field the user is asking about.
-            Pass an empty string for a general introduction to the scope level.
+            ISA-JSON path of the field the user is asking about. Pass an empty string for a general introduction to the scope level.
           example: "studies[0].studyDesignDescriptors"
         scope:
           $ref: '#/components/schemas/IsaScope'
         userQuestion:
           type: string
           description: >
-            Optional freeform question from the user. If omitted, MetaBuddy
-            returns a generic explanation of the field.
+            Optional freeform question from the user. If omitted, MetaBuddy returns a generic explanation of the field.
           example: "What kind of values are expected here for a field experiment?"
         isaJson:
           allOf:
-            - $ref: '#/components/schemas/IsaJson'
+          - $ref: '#/components/schemas/IsaJson'
           description: >
-            Current ISA-JSON state so the explanation can be tailored to
-            what the user has already filled in.
+            Current ISA-JSON state so the explanation can be tailored to what the user has already filled in.
 
     ExplainResponse:
       type: object
@@ -209,13 +188,12 @@ components:
           items:
             type: string
           example:
-            - "drought stress design (EFO:0001272)"
-            - "factorial design (EFO:0001426)"
+          - "drought stress design (EFO:0001272)"
+          - "factorial design (EFO:0001426)"
         ontologyTerms:
           type: array
           description: >
-            Suggested ontology terms if the field expects controlled vocabulary,
-            ordered by relevance.
+            Suggested ontology terms if the field expects controlled vocabulary, ordered by relevance.
           items:
             $ref: '#/components/schemas/OntologyTerm'
 
@@ -238,19 +216,14 @@ paths:
     post:
       summary: Convert uploaded files to ISA-JSON
       description: >
-        The user uploads one or more files they consider relevant (lab
-        notebooks, metadata spreadsheets, protocols, README files).
-        MetaBuddy extracts and maps content to the ISA schema at the given
-        scope level, returning a partial or complete ISA-JSON.
+        The user uploads one or more files they consider relevant (lab notebooks, metadata spreadsheets, protocols, README files). MetaBuddy extracts and maps content to the ISA schema at the given scope level, returning a partial or complete ISA-JSON.
 
-        If `existingIsa` is supplied, MetaBuddy merges extracted information
-        into the existing structure rather than generating from scratch.
+        If `existingIsa` is supplied, MetaBuddy merges extracted information into the existing structure rather than generating from scratch.
 
-        **Suggested supported file types:** PDF, XLSX, CSV, DOCX, TXT.
-        Maximum file size per upload to be agreed with the MetaBuddy team.
+        **Suggested supported file types:** PDF, XLSX, CSV, DOCX, TXT. Maximum file size per upload to be agreed with the MetaBuddy team.
       operationId: convertFilesToIsa
       tags:
-        - Assist
+      - Assist
       requestBody:
         required: true
         content:
@@ -258,15 +231,14 @@ paths:
             schema:
               type: object
               required:
-                - scope
+              - scope
               properties:
                 scope:
                   $ref: '#/components/schemas/IsaScope'
                 existingIsa:
                   type: string
                   description: >
-                    JSON string of existing ISA-JSON to extend (optional).
-                    MetaBuddy will fill gaps rather than overwrite existing values.
+                    JSON string of existing ISA-JSON to extend (optional). MetaBuddy will fill gaps rather than overwrite existing values.
                   example: '{"identifier":"STUDY-001","title":"My study"}'
                 files:
                   type: array
@@ -302,15 +274,12 @@ paths:
     post:
       summary: Validate ISA-JSON at a given scope level
       description: >
-        Checks the provided ISA-JSON for completeness and correctness within
-        the given scope. Combines rule-based checks (required fields,
-        controlled vocabulary) with LLM-generated contextual suggestions.
+        Checks the provided ISA-JSON for completeness and correctness within the given scope. Combines rule-based checks (required fields, controlled vocabulary) with LLM-generated contextual suggestions.
 
-        Errors indicate missing required fields or invalid values.
-        Warnings indicate potential issues. Suggestions are optional improvements.
+        Errors indicate missing required fields or invalid values. Warnings indicate potential issues. Suggestions are optional improvements.
       operationId: validateIsa
       tags:
-        - Assist
+      - Assist
       requestBody:
         required: true
         content:
@@ -333,11 +302,11 @@ paths:
               example:
                 valid: false
                 issues:
-                  - field: "studies[0].studyDesignDescriptors"
-                    severity: "error"
-                    message: "studyDesignDescriptors must contain at least one entry."
-                    suggestion: >
-                      Add a descriptor such as 'drought stress design' (EFO:0001272).
+                - field: "studies[0].studyDesignDescriptors"
+                  severity: "error"
+                  message: "studyDesignDescriptors must contain at least one entry."
+                  suggestion: >
+                    Add a descriptor such as 'drought stress design' (EFO:0001272).
         '400':
           description: Invalid or missing parameters.
           content:
@@ -351,18 +320,14 @@ paths:
     post:
       summary: Explain an ISA field or answer a user question
       description: >
-        Returns a contextual explanation of a specific ISA field, optionally
-        answering a freeform user question typed in the ISA Wizard UI.
+        Returns a contextual explanation of a specific ISA field, optionally answering a freeform user question typed in the ISA Wizard UI.
 
-        The current ISA-JSON state should be passed as `isaJson` so that
-        MetaBuddy can tailor the explanation — for example, recommending
-        ontology terms relevant to the organism or experiment type already recorded.
+        The current ISA-JSON state should be passed as `isaJson` so that MetaBuddy can tailor the explanation — for example, recommending ontology terms relevant to the organism or experiment type already recorded.
 
-        If `field` is an empty string and `userQuestion` is provided, this
-        acts as general freeform Q&A scoped to the current ISA level.
+        If `field` is an empty string and `userQuestion` is provided, this acts as general freeform Q&A scoped to the current ISA level.
       operationId: explainField
       tags:
-        - Assist
+      - Assist
       requestBody:
         required: true
         content:
@@ -393,7 +358,6 @@ paths:
           description: Missing or invalid API key.
 
 tags:
-  - name: Assist
-    description: >
-      Stateless assist calls: file-to-ISA conversion, ISA-JSON validation,
-      and contextual field explanation. Each call is fully self-contained.
+- name: Assist
+  description: >
+    Stateless assist calls: file-to-ISA conversion, ISA-JSON validation, and contextual field explanation. Each call is fully self-contained.
