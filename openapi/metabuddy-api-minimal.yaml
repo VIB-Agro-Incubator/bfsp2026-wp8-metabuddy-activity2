@@ -14,13 +14,13 @@ info:
 
     Every endpoint accepts a `scope` parameter that indicates which ISA hierarchy level the user is currently at in the wizard.
 
-  version: 0.2.1
+  version: 1.0.0
   contact:
     name: TBD
 
 servers:
 - url: https://metabuddy.dci.thehyve.nl/api/v1
-  description: MetaBuddy server
+  description: MetaBuddy server (assumpation)
 - url: https://bfsp2026-wp8-metabuddy-activity2.onrender.com/
   description: Mockup server
 

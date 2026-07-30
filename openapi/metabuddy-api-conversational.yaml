@@ -4,8 +4,7 @@ info:
   description: >
     LLM-powered ISA metadata assistance API, consumed by ISA Wizard.
 
-    This is the conversational specification. It is an independent alternative
-    to the minimal specification, targeting `/api/v2`. It adds:
+    This is the conversational specification. It is an independent alternative to the minimal specification, targeting `/api/v2`. It adds:
 
     - **Sessions** — persistent context and conversation history across
       a full wizard run, allowing MetaBuddy to give richer, continuity-aware
@@ -18,21 +17,11 @@ info:
 
     ## Relationship to the Minimal spec
 
-    This specification is independent of the minimal spec. Both versions run
-    simultaneously on the server — `/api/v1` (minimal, stateless) and `/api/v2`
-    (conversational, session-aware) coexist and do not interfere with each other.
-    The client application decides which version to target based on its own
-    development state; different client branches may support different versions.
-    The stateless `/convert`, `/validate`, `/explain` endpoints from the minimal
-    spec are not present here; all assist calls in this spec are session-scoped.
+    This specification is independent of the minimal spec. Both versions run simultaneously on the server — `/api/v1` (minimal, stateless) and `/api/v2` (conversational, session-aware) coexist and do not interfere with each other. The client application decides which version to target based on its own development state; different client branches may support different versions. The stateless `/convert`, `/validate`, `/explain` endpoints from the minimal spec are not present here; all assist calls in this spec are session-scoped.
 
     ## Authentication
 
-    ISA Wizard authenticates as a service client using a pre-shared API key
-    (`X-API-Key` header) issued by MetaBuddy. This is a backend-to-backend
-    credential managed via a Keycloak service account on the MetaBuddy side.
-    Individual end-user identity does not cross the boundary. ISA Wizard
-    end-users may be anonymous.
+    ISA Wizard authenticates as a service client using a pre-shared API key (`X-API-Key` header) issued by MetaBuddy. This is a backend-to-backend credential managed via a Keycloak service account on the MetaBuddy side. Individual end-user identity does not cross the boundary. ISA Wizard end-users may be anonymous.
 
     ## Session lifecycle
 
@@ -51,26 +40,24 @@ info:
 
     ## Streaming
 
-    SSE streaming support for the `/chat` endpoint is pending. When implemented,
-    clients will be able to request token-by-token responses by sending
-    `Accept: text/event-stream`, producing a typing effect in the UI.
+    SSE streaming support for the `/chat` endpoint is pending. When implemented, clients will be able to request token-by-token responses by sending `Accept: text/event-stream`, producing a typing effect in the UI.
 
     ## Async job pattern
 
-    Endpoints that support async return `202 Accepted` with a `jobId`.
-    ISA Wizard polls `GET /jobs/{jobId}` until `status` is `completed`
-    or `failed`.
+    Endpoints that support async return `202 Accepted` with a `jobId`. ISA Wizard polls `GET /jobs/{jobId}` until `status` is `completed` or `failed`.
 
-  version: 0.4.0
+  version: 1.0.0
   contact:
     name: TBD
 
 servers:
-  - url: https://metabuddy.dci.thehyve.nl/api/v2
-    description: Development / staging
+- url: https://metabuddy.dci.thehyve.nl/api/v2
+  description: MetaBuddy server (assumption)
+- url: https://bfsp2026-wp8-metabuddy-activity2.onrender.com/
+  description: Mockup server
 
 security:
-  - ApiKeyAuth: []
+- ApiKeyAuth: []
 
 # ---------------------------------------------------------------------------
 # Components
@@ -83,9 +70,7 @@ components:
       in: header
       name: X-API-Key
       description: >
-        Service-level API key issued by MetaBuddy to the ISA Wizard application.
-        Not tied to individual end-users. Managed via Keycloak service account
-        on the MetaBuddy side.
+        Service-level API key issued by MetaBuddy to the ISA Wizard application. Not tied to individual end-users. Managed via Keycloak service account on the MetaBuddy side.
 
   parameters:
     sessionId:
@@ -112,14 +97,11 @@ components:
     IsaScope:
       type: string
       enum:
-        - investigation
-        - study
-        - assay
+      - investigation
+      - study
+      - assay
       description: >
-        ISA hierarchy level the user is currently at in the wizard. Must be
-        one of: `investigation`, `study`, or `assay` (all lowercase). Maps
-        directly to the three levels of the ISA standard. MetaBuddy uses this
-        to limit its response to what is relevant at that level.
+        ISA hierarchy level the user is currently at in the wizard. Must be one of: `investigation`, `study`, or `assay` (all lowercase). Maps directly to the three levels of the ISA standard. MetaBuddy uses this to limit its response to what is relevant at that level.
 
     IsaJson:
       type: object
@@ -146,7 +128,7 @@ components:
           type: string
         severity:
           type: string
-          enum: [error, warning, suggestion]
+          enum: [ error, warning, suggestion ]
         message:
           type: string
         suggestion:
@@ -165,17 +147,15 @@ components:
     JobStatus:
       type: string
       enum:
-        - pending     # Job received, not yet started
-        - processing  # LLM/agents actively working
-        - completed   # Result available
-        - failed      # Processing error
+      - pending # Job received, not yet started
+      - processing # LLM/agents actively working
+      - completed # Result available
+      - failed # Processing error
 
     JobResponse:
       type: object
       description: >
-        Returned immediately by any endpoint that supports async operation.
-        ISA Wizard should poll GET /jobs/{jobId} until status is
-        'completed' or 'failed'.
+        Returned immediately by any endpoint that supports async operation. ISA Wizard should poll GET /jobs/{jobId} until status is 'completed' or 'failed'.
       properties:
         jobId:
           type: string
@@ -201,9 +181,7 @@ components:
         result:
           type: object
           description: >
-            The response payload of the original call. Schema matches the
-            synchronous response of the endpoint that created the job
-            (e.g. ConvertResponse for /convert).
+            The response payload of the original call. Schema matches the synchronous response of the endpoint that created the job (e.g. ConvertResponse for /convert).
           additionalProperties: true
         error:
           type: string
@@ -216,15 +194,13 @@ components:
       properties:
         initialIsa:
           allOf:
-            - $ref: '#/components/schemas/IsaJson'
+          - $ref: '#/components/schemas/IsaJson'
           description: >
-            Optional ISA-JSON to seed the session, if the user is resuming
-            a previously saved wizard state.
+            Optional ISA-JSON to seed the session, if the user is resuming a previously saved wizard state.
         metadata:
           type: object
           description: >
-            Optional key-value metadata ISA Wizard may associate with the
-            session (e.g. wizard run ID, user locale).
+            Optional key-value metadata ISA Wizard may associate with the session (e.g. wizard run ID, user locale).
           additionalProperties:
             type: string
 
@@ -244,18 +220,17 @@ components:
     SessionContextUpdateRequest:
       type: object
       required:
-        - isaJson
-        - scope
+      - isaJson
+      - scope
       properties:
         isaJson:
           allOf:
-            - $ref: '#/components/schemas/IsaJson'
+          - $ref: '#/components/schemas/IsaJson'
           description: >
-            Full current ISA-JSON state. Replaces the session's stored context.
-            Call this whenever the user advances to a new wizard step.
+            Full current ISA-JSON state. Replaces the session's stored context. Call this whenever the user advances to a new wizard step.
         scope:
           allOf:
-            - $ref: '#/components/schemas/IsaScope'
+          - $ref: '#/components/schemas/IsaScope'
           description: The wizard step the user has just reached.
 
     HistoryEntry:
@@ -269,7 +244,7 @@ components:
           format: date-time
         callType:
           type: string
-          enum: [convert, validate, explain, chat]
+          enum: [ convert, validate, explain, chat ]
         scope:
           $ref: '#/components/schemas/IsaScope'
         request:
@@ -302,17 +277,15 @@ components:
     ValidateRequest:
       type: object
       required:
-        - scope
+      - scope
       properties:
         scope:
           $ref: '#/components/schemas/IsaScope'
         isaJson:
           allOf:
-            - $ref: '#/components/schemas/IsaJson'
+          - $ref: '#/components/schemas/IsaJson'
           description: >
-            If provided, validates this ISA-JSON instead of the session's
-            stored context. Useful for validating an intermediate state
-            without modifying the session.
+            If provided, validates this ISA-JSON instead of the session's stored context. Useful for validating an intermediate state without modifying the session.
 
     ValidateResponse:
       type: object
@@ -327,8 +300,8 @@ components:
     ExplainRequest:
       type: object
       required:
-        - field
-        - scope
+      - field
+      - scope
       properties:
         field:
           type: string
@@ -358,15 +331,13 @@ components:
     ChatRequest:
       type: object
       required:
-        - message
-        - scope
+      - message
+      - scope
       properties:
         message:
           type: string
           description: >
-            Freeform message from the user. Not tied to a specific ISA field.
-            MetaBuddy will use the session's stored ISA-JSON context and
-            full conversation history to inform the response.
+            Freeform message from the user. Not tied to a specific ISA field. MetaBuddy will use the session's stored ISA-JSON context and full conversation history to inform the response.
           example: "I'm not sure whether my experiment counts as an intervention study or an observational one."
         scope:
           $ref: '#/components/schemas/IsaScope'
@@ -380,20 +351,18 @@ components:
         ontologyTerms:
           type: array
           description: >
-            Ontology terms suggested in the response, if any, extracted
-            for easy consumption by ISA Wizard UI.
+            Ontology terms suggested in the response, if any, extracted for easy consumption by ISA Wizard UI.
           items:
             $ref: '#/components/schemas/OntologyTerm'
         relatedFields:
           type: array
           description: >
-            ISA-JSON field paths that are relevant to the chat response,
-            so ISA Wizard can optionally highlight or navigate to them.
+            ISA-JSON field paths that are relevant to the chat response, so ISA Wizard can optionally highlight or navigate to them.
           items:
             type: string
           example:
-            - "studies[0].studyDesignDescriptors"
-            - "studies[0].studyFactors"
+          - "studies[0].studyDesignDescriptors"
+          - "studies[0].studyFactors"
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -406,15 +375,12 @@ paths:
     get:
       summary: Poll for async job result
       description: >
-        Returns the current status and, once completed, the result of an
-        async job. ISA Wizard should poll this endpoint after receiving a
-        202 response from any endpoint that supports async operation.
-        Suggested polling interval: 2–5 seconds.
+        Returns the current status and, once completed, the result of an async job. ISA Wizard should poll this endpoint after receiving a 202 response from any endpoint that supports async operation. Suggested polling interval: 2–5 seconds.
       operationId: getJobResult
       tags:
-        - Jobs
+      - Jobs
       parameters:
-        - $ref: '#/components/parameters/jobId'
+      - $ref: '#/components/parameters/jobId'
       responses:
         '200':
           description: Job status and result (if completed).
@@ -433,12 +399,10 @@ paths:
     post:
       summary: Start a new assistant session
       description: >
-        Creates a MetaBuddy session for a single ISA Wizard run.
-        Call this when the user starts a new wizard run and store the
-        returned `sessionId` for the duration of that run.
+        Creates a MetaBuddy session for a single ISA Wizard run. Call this when the user starts a new wizard run and store the returned `sessionId` for the duration of that run.
       operationId: createSession
       tags:
-        - Session
+      - Session
       requestBody:
         required: false
         content:
@@ -459,14 +423,12 @@ paths:
     delete:
       summary: End a session
       description: >
-        Terminates the session and discards stored context and history.
-        Call this when the user completes or abandons a wizard run.
-        Sessions also expire automatically after a period of inactivity.
+        Terminates the session and discards stored context and history. Call this when the user completes or abandons a wizard run. Sessions also expire automatically after a period of inactivity.
       operationId: deleteSession
       tags:
-        - Session
+      - Session
       parameters:
-        - $ref: '#/components/parameters/sessionId'
+      - $ref: '#/components/parameters/sessionId'
       responses:
         '204':
           description: Session deleted.
@@ -479,15 +441,12 @@ paths:
     put:
       summary: Update the session's ISA-JSON context
       description: >
-        Pushes the current ISA-JSON state to the session. Call this each
-        time the user advances to a new wizard step so that subsequent
-        assist calls have up-to-date context without requiring ISA Wizard
-        to re-send the full object on every call.
+        Pushes the current ISA-JSON state to the session. Call this each time the user advances to a new wizard step so that subsequent assist calls have up-to-date context without requiring ISA Wizard to re-send the full object on every call.
       operationId: updateSessionContext
       tags:
-        - Session
+      - Session
       parameters:
-        - $ref: '#/components/parameters/sessionId'
+      - $ref: '#/components/parameters/sessionId'
       requestBody:
         required: true
         content:
@@ -512,27 +471,25 @@ paths:
     get:
       summary: Retrieve session conversation history
       description: >
-        Returns all assist and chat calls made during this session,
-        ordered chronologically. Useful for ISA Wizard to display
-        past interactions in the UI or resume a session visually.
+        Returns all assist and chat calls made during this session, ordered chronologically. Useful for ISA Wizard to display past interactions in the UI or resume a session visually.
       operationId: getSessionHistory
       tags:
-        - Session
+      - Session
       parameters:
-        - $ref: '#/components/parameters/sessionId'
-        - name: callType
-          in: query
-          required: false
-          schema:
-            type: string
-            enum: [convert, validate, explain, chat]
-          description: Filter history by call type.
-        - name: scope
-          in: query
-          required: false
-          schema:
-            $ref: '#/components/schemas/IsaScope'
-          description: Filter history by ISA scope level.
+      - $ref: '#/components/parameters/sessionId'
+      - name: callType
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: [ convert, validate, explain, chat ]
+        description: Filter history by call type.
+      - name: scope
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/IsaScope'
+        description: Filter history by ISA scope level.
       responses:
         '200':
           description: Ordered conversation history.
@@ -559,25 +516,21 @@ paths:
     post:
       summary: Convert uploaded files to ISA-JSON (session-aware, async supported)
       description: >
-        File-to-ISA conversion using the session's stored context and history.
-        MetaBuddy merges extracted information into the session's current
-        ISA-JSON rather than generating from scratch.
+        File-to-ISA conversion using the session's stored context and history. MetaBuddy merges extracted information into the session's current ISA-JSON rather than generating from scratch.
 
-        Supports async operation: pass `prefer: respond-async` in the request
-        header to receive a 202 with a `jobId` instead of waiting for the
-        full result. Recommended for large file uploads.
+        Supports async operation: pass `prefer: respond-async` in the request header to receive a 202 with a `jobId` instead of waiting for the full result. Recommended for large file uploads.
       operationId: convertFilesToIsaSession
       tags:
-        - Assist
+      - Assist
       parameters:
-        - $ref: '#/components/parameters/sessionId'
-        - name: Prefer
-          in: header
-          required: false
-          schema:
-            type: string
-            enum: [respond-async]
-          description: Pass 'respond-async' to receive a job ID and poll for the result.
+      - $ref: '#/components/parameters/sessionId'
+      - name: Prefer
+        in: header
+        required: false
+        schema:
+          type: string
+          enum: [ respond-async ]
+        description: Pass 'respond-async' to receive a job ID and poll for the result.
       requestBody:
         required: true
         content:
@@ -585,7 +538,7 @@ paths:
             schema:
               type: object
               required:
-                - scope
+              - scope
               properties:
                 scope:
                   $ref: '#/components/schemas/IsaScope'
@@ -630,14 +583,12 @@ paths:
     post:
       summary: Validate ISA-JSON (session-aware)
       description: >
-        Validates using the session's stored ISA-JSON context and conversation
-        history. An explicit `isaJson` payload can be passed to validate an
-        intermediate state without modifying the session context.
+        Validates using the session's stored ISA-JSON context and conversation history. An explicit `isaJson` payload can be passed to validate an intermediate state without modifying the session context.
       operationId: validateIsaSession
       tags:
-        - Assist
+      - Assist
       parameters:
-        - $ref: '#/components/parameters/sessionId'
+      - $ref: '#/components/parameters/sessionId'
       requestBody:
         required: true
         content:
@@ -666,15 +617,12 @@ paths:
     post:
       summary: Explain an ISA field (session-aware)
       description: >
-        Contextual field explanation using the session's stored ISA-JSON
-        and full conversation history. MetaBuddy can refer back to earlier
-        interactions, e.g. "As you noted earlier, your study involves
-        field conditions, so for this assay parameter..."
+        Contextual field explanation using the session's stored ISA-JSON and full conversation history. MetaBuddy can refer back to earlier interactions, e.g. "As you noted earlier, your study involves field conditions, so for this assay parameter..."
       operationId: explainFieldSession
       tags:
-        - Assist
+      - Assist
       parameters:
-        - $ref: '#/components/parameters/sessionId'
+      - $ref: '#/components/parameters/sessionId'
       requestBody:
         required: true
         content:
@@ -703,26 +651,18 @@ paths:
     post:
       summary: Freeform chat within session context
       description: >
-        Open-ended conversational endpoint for questions not tied to a
-        specific ISA field. Uses the session's full stored context
-        (ISA-JSON state + conversation history) to give contextually
-        relevant answers.
+        Open-ended conversational endpoint for questions not tied to a specific ISA field. Uses the session's full stored context (ISA-JSON state + conversation history) to give contextually relevant answers.
 
-        Examples of appropriate chat messages:
-        - "I'm not sure if my experiment is an intervention or observational study."
-        - "Can you summarise what we've defined so far for this study?"
-        - "What's the difference between a study factor and a study characteristic?"
+        Examples of appropriate chat messages: - "I'm not sure if my experiment is an intervention or observational study." - "Can you summarise what we've defined so far for this study?" - "What's the difference between a study factor and a study characteristic?"
 
-        The response includes `relatedFields` so ISA Wizard can optionally
-        highlight or navigate to the fields mentioned in the answer.
+        The response includes `relatedFields` so ISA Wizard can optionally highlight or navigate to the fields mentioned in the answer.
 
-        SSE streaming support is pending. When available, send
-        `Accept: text/event-stream` to receive tokens incrementally.
+        SSE streaming support is pending. When available, send `Accept: text/event-stream` to receive tokens incrementally.
       operationId: chatSession
       tags:
-        - Assist
+      - Assist
       parameters:
-        - $ref: '#/components/parameters/sessionId'
+      - $ref: '#/components/parameters/sessionId'
       requestBody:
         required: true
         content:
@@ -754,16 +694,12 @@ paths:
 # Tags
 # ---------------------------------------------------------------------------
 tags:
-  - name: Jobs
-    description: >
-      Poll for results of async operations. Used when ISA Wizard passes
-      the 'Prefer: respond-async' header to a supported endpoint.
-  - name: Session
-    description: >
-      Manage assistant sessions. Each session maps to one ISA Wizard run
-      and stores ISA-JSON context and full conversation history.
-  - name: Assist
-    description: >
-      Session-scoped assist calls: file conversion, validation, field
-      explanation, and freeform chat. All calls are informed by session
-      context and history.
+- name: Jobs
+  description: >
+    Poll for results of async operations. Used when ISA Wizard passes the 'Prefer: respond-async' header to a supported endpoint.
+- name: Session
+  description: >
+    Manage assistant sessions. Each session maps to one ISA Wizard run and stores ISA-JSON context and full conversation history.
+- name: Assist
+  description: >
+    Session-scoped assist calls: file conversion, validation, field explanation, and freeform chat. All calls are informed by session context and history.
