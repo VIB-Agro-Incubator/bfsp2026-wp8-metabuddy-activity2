@@ -1,4 +1,4 @@
 # Dockerfile.conversational
 FROM stoplight/prism:4
-COPY openapi/metabuddy-api-v0.4.0-conversational.yaml /specs/api.yaml
+COPY openapi/metabuddy-api-conversational.yaml /specs/api.yaml
 CMD ["mock", "-h", "0.0.0.0", "--cors", "/specs/api.yaml"]
