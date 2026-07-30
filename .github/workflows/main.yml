@@ -32,12 +32,12 @@ jobs:
 
   tag-versions:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
-
       - name: Install yq
         uses: mikefarah/yq@v4.44.3
-
       - name: Tag minimal spec if version changed
         run: |
           VERSION=$(yq '.info.version' openapi/metabuddy-api-minimal.yaml)
@@ -48,7 +48,6 @@ jobs:
             git tag "$TAG"
             git push origin "$TAG"
           fi
-
       - name: Tag conversational spec if version changed
         run: |
           VERSION=$(yq '.info.version' openapi/metabuddy-api-conversational.yaml)

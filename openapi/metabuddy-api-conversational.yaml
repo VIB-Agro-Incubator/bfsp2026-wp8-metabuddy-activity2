@@ -52,8 +52,8 @@ info:
 
 servers:
 - url: https://metabuddy.dci.thehyve.nl/api/v2
-  description: MetaBuddy server (assumption)
-- url: https://bfsp2026-wp8-metabuddy-activity2.onrender.com/
+  description: MetaBuddy API server (assumption)
+- url: https://bfsp2026-wp8-metabuddy-activity2-20ux.onrender.com
   description: Mockup server
 
 security:
