@@ -14,7 +14,7 @@ info:
 
     Every endpoint accepts a `scope` parameter that indicates which ISA hierarchy level the user is currently at in the wizard.
 
-  version: 1.0.1
+  version: 1.0.2
   contact:
     name: TBD
 
