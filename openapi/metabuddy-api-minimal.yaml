@@ -14,7 +14,7 @@ info:
 
     Every endpoint accepts a `scope` parameter that indicates which ISA hierarchy level the user is currently at in the wizard.
 
-  version: 1.0.0
+  version: 1.0.1
   contact:
     name: TBD
 
@@ -41,15 +41,22 @@ components:
         Service-level API key issued by MetaBuddy to the ISA Wizard application. Not tied to individual end-users. Managed via Keycloak service account on the MetaBuddy side.
 
   schemas:
-
     IsaScope:
       type: string
-      enum:
-      - investigation
-      - study
-      - assay
+      minLength: 1
+      pattern: '^[a-z][a-z0-9_]*$'
+      example: sample
       description: >
-        ISA hierarchy level the user is currently at in the wizard. Must be one of: `investigation`, `study`, or `assay` (all lowercase). Maps directly to the three levels of the ISA standard. MetaBuddy uses this to limit its response to what is relevant at that level.
+        The ISA entity the user is currently working on in the wizard. Any ISA
+        entity type is allowed. This includes the three hierarchy levels
+        (`investigation`, `study`, `assay`) and entities within them, such as
+        `source`, `sample`, `protocol`, `process`, `material`, `data_file`,
+        `factor`, `person`, `publication` or `ontology_annotation`. Values are
+        lowercase, with underscores between words, matching the entity names in
+        the ISA model. MetaBuddy uses this value to limit its response to what is
+        relevant for that entity. If MetaBuddy does not recognise a value, it
+        still accepts it and gives a general response instead of rejecting the
+        request.
 
     IsaJson:
       type: object
@@ -232,7 +239,19 @@ paths:
               type: object
               required:
               - scope
+              - files
               properties:
+                prompt:
+                  type: string
+                  maxLength: 2000
+                  description: >
+                    Optional free-text instruction that guides the conversion,
+                    e.g. what information to extract, which files to prioritise,
+                    or how to interpret ambiguous content. If omitted, MetaBuddy
+                    performs a default extraction for the given `scope`. The
+                    prompt refines the conversion but cannot extend it beyond
+                    `scope`.
+                  example: 'Fill in the study design and growth conditions from the attached protocol; ignore the raw data sheets.'
                 scope:
                   $ref: '#/components/schemas/IsaScope'
                 existingIsa:
