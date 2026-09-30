@@ -46,7 +46,7 @@ info:
 
     Endpoints that support async return `202 Accepted` with a `jobId`. ISA Wizard polls `GET /jobs/{jobId}` until `status` is `completed` or `failed`.
 
-  version: 1.0.1
+  version: 1.0.2
   contact:
     name: TBD
 
