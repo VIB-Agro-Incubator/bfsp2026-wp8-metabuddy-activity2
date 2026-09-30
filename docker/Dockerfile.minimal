@@ -1,4 +1,4 @@
 # Dockerfile.minimal
-FROM stoplight/prism:4
+FROM stoplight/prism:5
 COPY openapi/metabuddy-api-minimal.yaml /specs/api.yaml
 CMD ["mock", "-h", "0.0.0.0", "--cors", "/specs/api.yaml"]
